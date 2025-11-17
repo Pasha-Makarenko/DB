@@ -36,19 +36,19 @@ CREATE TYPE shipment_status AS ENUM (
 
 CREATE TABLE users
 (
-  id         SERIAL PRIMARY KEY,
-  first_name VARCHAR(255)        NOT NULL,
-  last_name  VARCHAR(255)        NOT NULL,
-  email      VARCHAR(255) UNIQUE NOT NULL CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
-  phone VARCHAR(50) NOT NULL,
-  country VARCHAR(100) NOT NULL,
-  city VARCHAR(100) NOT NULL,
-  street VARCHAR(255) NOT NULL,
-  house_number VARCHAR(50) NOT NULL,
+  id               SERIAL PRIMARY KEY,
+  first_name       VARCHAR(255)        NOT NULL,
+  last_name        VARCHAR(255)        NOT NULL,
+  email            VARCHAR(255) UNIQUE NOT NULL  CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
+  phone            VARCHAR(50) UNIQUE  NOT NULL,
+  country          VARCHAR(100)        NOT NULL,
+  city             VARCHAR(100)        NOT NULL,
+  street           VARCHAR(255)        NOT NULL,
+  house_number     VARCHAR(50)         NOT NULL,
   apartment_number VARCHAR(50),
-  postal_code VARCHAR(20) NOT NULL,
-  avatar VARCHAR(255),
-  registered_at TIMESTAMP NOT NULL DEFAULT NOW()
+  postal_code      VARCHAR(20)         NOT NULL,
+  avatar           VARCHAR(255),
+  registered_at    TIMESTAMP           NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE categories
@@ -80,7 +80,9 @@ CREATE TABLE products
   discount       INT            NOT NULL DEFAULT 0 CHECK (discount BETWEEN 0 AND 100),
   stock_quantity INT            NOT NULL CHECK (stock_quantity >= 0),
   owner_id       INT            NOT NULL REFERENCES seller_profiles (id) ON DELETE CASCADE,
-  category_id    INT            NOT NULL REFERENCES categories (id) ON DELETE RESTRICT
+  category_id    INT            NOT NULL REFERENCES categories (id) ON DELETE RESTRICT,
+  created_at     TIMESTAMP      NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMP      NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE orders
@@ -103,9 +105,10 @@ CREATE TABLE order_products
 CREATE TABLE reviews
 (
   id               SERIAL PRIMARY KEY,
-  user_id          INT NOT NULL REFERENCES users (id) ON DELETE SET NULL,
-  product_id       INT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+  user_id          INT       REFERENCES users (id) ON DELETE SET NULL,
+  product_id       INT       NOT NULL REFERENCES products (id) ON DELETE CASCADE,
   comment          TEXT,
+  created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
   parent_review_id INT REFERENCES reviews (id) ON DELETE CASCADE,
   CHECK (id <> parent_review_id)
 );
@@ -115,17 +118,19 @@ CREATE TABLE rating
   id         SERIAL PRIMARY KEY,
   user_id    INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
   product_id INT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
-  rating     INT NOT NULL DEFAULT 0 CHECK (rating BETWEEN 0 AND 5),
+  rating     INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   UNIQUE (user_id, product_id)
 );
 
 CREATE TABLE payments
 (
-  id       SERIAL PRIMARY KEY,
-  order_id INT            NOT NULL UNIQUE REFERENCES orders (id) ON DELETE RESTRICT,
-  amount   DECIMAL(10, 2) NOT NULL CHECK (amount > 0),
-  method   payment_method NOT NULL,
-  status   payment_status NOT NULL DEFAULT 'PENDING'
+  id         SERIAL PRIMARY KEY,
+  order_id   INT            NOT NULL UNIQUE REFERENCES orders (id) ON DELETE RESTRICT,
+  amount     DECIMAL(10, 2) NOT NULL CHECK (amount > 0),
+  method     payment_method NOT NULL,
+  status     payment_status NOT NULL DEFAULT 'PENDING',
+  created_at TIMESTAMP      NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP      NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE shipments
@@ -134,7 +139,9 @@ CREATE TABLE shipments
   order_id        INT             NOT NULL UNIQUE REFERENCES orders (id) ON DELETE RESTRICT,
   method          shipment_method NOT NULL,
   status          shipment_status NOT NULL DEFAULT 'PENDING',
-  tracking_number VARCHAR(100)    NOT NULL CHECK (tracking_number <> '')
+  tracking_number VARCHAR(100),
+  created_at      TIMESTAMP       NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_users_name ON users (last_name, first_name);
