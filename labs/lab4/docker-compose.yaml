@@ -1,0 +1,34 @@
+services:
+  postgres:
+    container_name: db.lab4.postgres
+    image: postgres:16.4-alpine
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./data_lab4:/var/lib/postgresql/data
+    networks:
+      - db-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: db.lab4.pgadmin
+    image: dpage/pgadmin4
+    env_file:
+      - .env
+    ports:
+      - "${PGADMIN_DEFAULT_PORT}:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - db-net
+
+networks:
+  db-net:
+    driver: bridge
