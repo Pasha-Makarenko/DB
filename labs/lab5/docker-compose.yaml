@@ -8,8 +8,6 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - ./data_lab5:/var/lib/postgresql/data
-    networks:
-      - db-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
