@@ -1,0 +1,17 @@
+{
+  "name": "lab6",
+  "version": "1.0.0",
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "up": "docker-compose --env-file .env up -d",
+    "down": "docker-compose --env-file .env down",
+    "generate": "npx prisma generate",
+    "migrate": "npx prisma migrate"
+  },
+  "devDependencies": {
+    "@prisma/client": "^6.19.0",
+    "prisma": "^6.19.0"
+  }
+}
